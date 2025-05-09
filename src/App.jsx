@@ -41,7 +41,8 @@ function App() {
                   Click on the Vite and React logos to learn more
                 </p>
                 <div>
-                  <a href="/2048" target="_self">
+                  {/* Updated link with HashRouter */}
+                  <a href="#/2048" target="_self">
                     Play 2048 Game (Original)
                   </a>
                   <br />
@@ -50,7 +51,7 @@ function App() {
               </div>
             } 
           />
-
+  
           {/* Game Routes */}
           <Route path="/2048" element={<Game />} /> {/* Original Game */}
           <Route path="/2048test" element={<GameTest />} /> {/* New Version with board size selector and swipe gestures */}
