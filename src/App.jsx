@@ -1,5 +1,5 @@
 // src/App.jsx
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css'; // Keep your original CSS intact
 import reactLogo from './assets/react.svg'; // React logo path
 import viteLogo from '/vite.svg'; // Vite logo path from public
