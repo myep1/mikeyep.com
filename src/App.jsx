@@ -8,6 +8,7 @@ import Game from './2048/Game'; // Original working game component
 import GameTest from './2048/GameTest'; // New version with board size selector and swipe gestures
 
 function App() {
+  const deployTimestamp = import.meta.env.VITE_DEPLOY_TIMESTAMP;
   const [count, setCount] = useState(0);
 
   return (
@@ -44,7 +45,7 @@ function App() {
                     Play 2048 Game (Original)
                   </a>
                   <br />
-             
+                  <p>Deployed on: {deployTimestamp}</p>
                 </div>
               </div>
             } 

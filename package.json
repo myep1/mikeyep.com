@@ -5,13 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "VITE_DEPLOY_TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S') vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "deploy": "npm run build && cp CNAME dist/ &&  GITHUB_TOKEN=$GITHUB_TOKEN gh-pages -d dist --repo https://$GITHUB_TOKEN@github.com/myep1/mikeyep.com.git",
     "deployold": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
+    "dotenv": "^16.5.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.0"
