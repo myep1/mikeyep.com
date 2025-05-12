@@ -2,13 +2,13 @@
 import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css'; 
 import Game from './2048/Game'; // Original working game component
-import GameTest from './2048/GameTest'; // New version with board size selector and swipe gestures
 import HackerTyper from './components/HackerTyper/HackerTyper';
 
 function App() {
   const deployTimestamp = import.meta.env.VITE_DEPLOY_TIMESTAMP; 
   const deployType = import.meta.env.VITE_DEPLOY_TYPE; 
   const year = new Date().getFullYear();
+  const renderHackerTyper = import.meta.env.VITE_HACKER_TYPER; 
   return (
     <Router>
       <div className="App">
@@ -18,8 +18,8 @@ function App() {
             path="/" 
             element={
               <div>
-                <div className="hacker-top-left">
-                  {/*<HackerTyper />*/}
+                <div className="hacker-top-left">               
+                  {renderHackerTyper}
                 </div>               
                 <div>
                   {/* Updated link with HashRouter */}
@@ -34,8 +34,7 @@ function App() {
                 </div>
               </div>
             } 
-          />  
-          {/* Game Routes */}
+          />         
           <Route path="/2048" element={<Game />} /> {/* Original Game */}          
         </Routes>
       </div>
