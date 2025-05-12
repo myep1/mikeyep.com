@@ -1,10 +1,24 @@
 /* Base typography */
-body {
+/*body {
   font-family: Arial, sans-serif;
   font-size: 16px;
   line-height: 1.6;
   background-color: #f8f9fa;
   color: #212529;
+}*/
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  background-color: #121212;
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  color: white;
 }
 
 /* Headings */
@@ -50,3 +64,24 @@ input, textarea, select {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+
+.hacker-top-left {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.hacker-typer-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 10px;
+  color: #0f0;
+  font-family: monospace;
+  white-space: pre; 
+}
+
+

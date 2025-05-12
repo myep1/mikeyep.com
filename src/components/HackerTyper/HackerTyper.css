@@ -1,14 +1,13 @@
 /* src/components/HackerTyper/HackerTyper.css */
+
 .hacker-typer-container {
-  font-family: 'Courier New', Courier, monospace;  /* Monospace font */
-  white-space: pre-wrap;  /* Preserve white space */
-  font-size: 18px;
-  background-color: black;  /* Set background to black */
-  color: green;  /* Green text for that "hacker" feel */
-  padding: 20px;
-  min-height: 100vh;  /* Full screen height */
-  display: flex;
-  justify-content: center;  /* Center content horizontally */
-  align-items: center;  /* Center content vertically */
-  overflow: hidden;  /* Prevent overflow */
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 10px;
+  color: #0f0;
+  font-family: monospace;
+  white-space: pre; 
 }
+

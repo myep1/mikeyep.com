@@ -2,49 +2,77 @@ import React, { useState, useEffect } from 'react';
 import './HackerTyper.css'; // Import external CSS for styling
 
 function HackerTyper() {
-  const [code, setCode] = useState('');
   const [lineIndex, setLineIndex] = useState(0);  // Track the current line index
   const [typing, setTyping] = useState(false);  // Track if typing is in progress
-
-  const lines = [
-    'const password = "admin123";',
-    'function hackThePlanet() {',
-    '  let response = sendRequest("http://hackerspace.com");',
-    '  if (response.status === 200) {',
-    '    executeCommand(response.data);',
-    '  }',
-    '}',
-    'hackThePlanet();',
-    '/* Hacking successful. */'
-  ];
+  const [display, setDisplay] = useState(''); // final rendered text
 
   useEffect(() => {
-    const typingEffect = () => {
-      const currentLine = lines[lineIndex];
+    const lines = [
+      '',
+      'Mike Yep',
+      '',
+      'Senior Software Engineer with 25 years of experience specializing in backend development,',
+      'cloud technologies, and building scalable systems. Proficient in Java, SQL, PostgreSQL, MySQL, Linux/UNIX',
+      'environments, web development, and JavaScript. Experienced in troubleshooting, performance tuning, and',
+      'collaborating in Agile teams to ensure high-quality software delivery. Adept at code reviews, mentoring',
+      'junior engineers, and ensuring high-quality, maintainable code.',
+      '',
+      'TECHNICAL SKILLS',
+      '',
+      'Languages & Frameworks: Java, Kotlin, C#, C, PHP, .NET, JavaScript, HTML, CSS, SASS, Vue, React, jQuery, Node.js',
+      '',
+      'Web & Backend Development: REST APIs, API integrations, Microservices',
+      '',
+      'Databases: PostgreSQL, MySQL, MS SQL Server (SSMS), DB2',
+      '',
+      'Tools & IDEs: IntelliJ, PHPStorm, Visual Studio, Postman, Git, Gradle, Sqitch',
+      '',
+      'DevOps & Systems: Linux, Bash scripting, Docker, Server administration, CI/CD practices',
+      '',
+      'Cloud & Networking: AWS, Networking, PRI/SIP/VOIP systems',
+      '',
+      'Architecture & Software Practices: Backend development, Data modeling, Agile development, Unit testing',
+      '(JUnit, custom), RabbitMQ, SCRUM, Kanban',
+      '',
+      'Normal Termination'
+    ];
 
-      if (code.length < currentLine.length && !typing) {
-        setTyping(true);
-        setTimeout(() => {
-          setCode((prev) => prev + currentLine[prev.length]);  // Add one character at a time
-          setTyping(false);
-        }, 50);  // Typing speed: 50ms per character
-      } else if (code.length === currentLine.length) {
-        // Once the line is fully typed, wait for 2 seconds, then move to the next line
-        setTimeout(() => {
-          setCode((prev) => prev + '\n');  // Add a newline character after the line is typed
-          setLineIndex((prevIndex) => (prevIndex + 1) % lines.length);  // Move to the next line
-        }, 2000);  // Pause for 2 seconds before moving to the next line
+    if (typing || lineIndex >= lines.length) return;
+
+    setTyping(true);
+    const fullLine = lines[lineIndex];
+    let charIndex = 0;
+
+    const typeChar = () => {
+      if (charIndex < fullLine.length) {
+        // Append the character to the display
+        setDisplay((prev) => prev + fullLine[charIndex - 1]);
+        charIndex++;
+        setTimeout(typeChar, 30); 
+      } else {
+        // When the line is finished, add a newline character and move to next line
+        setDisplay((prev) => prev + '\n');
+        setLineIndex((prev) => prev + 1);  // Move to next line
+        setTyping(false);
+
+        // Restart after the last line
+        if (lineIndex === lines.length - 1) {
+          setTimeout(() => {
+            setDisplay('');
+            setLineIndex(0);  // Reset to the first line
+          }, 5000); // 3-second pause before restarting
+        }
       }
     };
 
-    typingEffect();  // Call once to start typing immediately
+    typeChar();  // Start typing
 
-  }, [code, lineIndex, typing]);  // Dependency on `code`, `lineIndex`, and `typing`
+  }, [lineIndex, typing]);  // Trigger when lineIndex or typing changes
 
   return (
     <div className="hacker-typer-container">
-      {code.split('\n').map((line, index) => (
-        <span key={index}>{line}<br /></span>  // Render each line with a <br /> tag
+      {display.split('\n').map((line, i) => (
+        <span key={i}>{line}<br /></span>  // Render each line with <br />
       ))}
     </div>
   );
