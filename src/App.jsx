@@ -3,7 +3,7 @@ import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css'; 
 import Game from './2048/Game'; // Original working game component
 import HackerTyper from './components/HackerTyper/HackerTyper';
-import Calculator from './components/Calculator/Calculator';
+//import Calculator from './components/Calculator/Calculator';
 
 function App() {
   const deployTimestamp = import.meta.env.VITE_DEPLOY_TIMESTAMP; 
@@ -34,7 +34,7 @@ function App() {
             }
           />
           <Route path="/2048" element={<Game />} />
-          <Route path="/Calculator" element={<Calculator />} />
+          {/*<Route path="/Calculator" element={<Calculator />} />*/}
         </Routes>
       </div>
     </Router>
