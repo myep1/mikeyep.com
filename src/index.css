@@ -25,21 +25,10 @@ img, video {
   display: block;
 }
 
-/* Set base font */
+/* Set base font and color */
 body {
   line-height: 1.5;
   font-family: sans-serif;
   background-color: #fff;
   color: #000;
 }
-
-body.light {
-  background-color: #f8f9fa;
-  color: #212529;
-}
-
-body.dark {
-  background-color: #121212;
-  color: #eee;
-}
-

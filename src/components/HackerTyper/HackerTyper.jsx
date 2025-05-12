@@ -5,34 +5,20 @@ function HackerTyper() {
   const [lineIndex, setLineIndex] = useState(0);  // Track the current line index
   const [typing, setTyping] = useState(false);  // Track if typing is in progress
   const [display, setDisplay] = useState(''); // final rendered text
+  
+  useEffect(() => {
+    setLineIndex(0);
+  }, []);
 
   useEffect(() => {
     const lines = [
-      '',
+      '',      
       'Mike Yep',
       '',
-      'Senior Software Engineer with 25 years of experience specializing in backend development,',
-      'cloud technologies, and building scalable systems. Proficient in Java, SQL, PostgreSQL, MySQL, Linux/UNIX',
-      'environments, web development, and JavaScript. Experienced in troubleshooting, performance tuning, and',
-      'collaborating in Agile teams to ensure high-quality software delivery. Adept at code reviews, mentoring',
-      'junior engineers, and ensuring high-quality, maintainable code.',
+      'Senior Software Engineer with 25 years of experience specializing in backend development, cloud technologies, and building scalable systems. Proficient in Java, SQL, PostgreSQL, MySQL, Linux/UNIX environments, web development, and JavaScript. Experienced in troubleshooting, performance tuning, and collaborating in Agile teams to ensure high-quality software delivery. Adept at code reviews, mentoring junior engineers, and ensuring high-quality, maintainable code.',
       '',
-      'TECHNICAL SKILLS',
-      '',
-      'Languages & Frameworks: Java, Kotlin, C#, C, PHP, .NET, JavaScript, HTML, CSS, SASS, Vue, React, jQuery, Node.js',
-      '',
-      'Web & Backend Development: REST APIs, API integrations, Microservices',
-      '',
-      'Databases: PostgreSQL, MySQL, MS SQL Server (SSMS), DB2',
-      '',
-      'Tools & IDEs: IntelliJ, PHPStorm, Visual Studio, Postman, Git, Gradle, Sqitch',
-      '',
-      'DevOps & Systems: Linux, Bash scripting, Docker, Server administration, CI/CD practices',
-      '',
-      'Cloud & Networking: AWS, Networking, PRI/SIP/VOIP systems',
-      '',
-      'Architecture & Software Practices: Backend development, Data modeling, Agile development, Unit testing',
-      '(JUnit, custom), RabbitMQ, SCRUM, Kanban',
+      'SKILLS:',
+      'AJAX, AWS, Agile, Bash, Bootstrap, C, C#, CI/CD, CSS, Code Review, Cryptography, DBeaver, DB2, DNS, Distributed Systems, Docker, EC2, Eclipse, ElasticSearch, Event-Driven, Exposed, FTP, Figma, FinTech, FullStack, Git, GitHub, Gradle, HTML, IntelliJ, JFreeChart, JUnit, Jackson, Java, JavaScript, Kanban, Kotlin, Linux, Microservices, Multi-Tenant, Multithreading, MySQL, Nagios, Networking, Node.js, PHP, PHPStorm, PostgreSQL, Postman, PowerShell, RabbitMQ, React, REST APIs, S3, SCRUM, SMTP, SOAP, Sqitch, SQL, SaaS, Servlets, TCP/IP, Telecom, Tomcat, VLAN, VPN, Visual Studio, Vue, Webpack, Wireshark, jQuery, pgAdmin',
       '',
       'Normal Termination'
     ];
@@ -48,7 +34,7 @@ function HackerTyper() {
         // Append the character to the display
         setDisplay((prev) => prev + fullLine[charIndex - 1]);
         charIndex++;
-        setTimeout(typeChar, 30); 
+        setTimeout(typeChar, 10); 
       } else {
         // When the line is finished, add a newline character and move to next line
         setDisplay((prev) => prev + '\n');
@@ -71,9 +57,7 @@ function HackerTyper() {
 
   return (
     <div className="hacker-typer-container">
-      {display.split('\n').map((line, i) => (
-        <span key={i}>{line}<br /></span>  // Render each line with <br />
-      ))}
+      {display}      
     </div>
   );
 }

@@ -9,33 +9,30 @@ function App() {
   const deployType = import.meta.env.VITE_DEPLOY_TYPE; 
   const year = new Date().getFullYear();
   const renderHackerTyper = import.meta.env.VITE_HACKER_TYPER; 
+
   return (
     <Router>
-      <div className="App">
+      <div className="app-container">
         <Routes>
-          {/* Landing Page Route */}
           <Route 
             path="/" 
             element={
-              <div>
-                <div className="hacker-top-left">               
+              <>
+                <div className="hacker-top-left">
                   {renderHackerTyper === 'true' && <HackerTyper />}
-                </div>               
-                <div>
-                  {/* Updated link with HashRouter */}
-                  <a href="#/2048" target="_self">
-                    Play 2048 (Original)
-                  </a>
+                </div>
+                <div className="footer-block">
+                  <a href="#/2048" target="_self">Play 2048 (Original)</a>
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                   <a href="https://www.linkedin.com/in/mike-yep" target="_blank">Linkedin Profile</a>
                   <br />
                   <span>© {year} Mike Yep. All Rights Reserved.</span>
                   <p>{deployType}{deployTimestamp}</p>
                 </div>
-              </div>
-            } 
-          />         
-          <Route path="/2048" element={<Game />} /> {/* Original Game */}          
+              </>
+            }
+          />
+          <Route path="/2048" element={<Game />} />
         </Routes>
       </div>
     </Router>
