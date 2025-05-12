@@ -19,7 +19,7 @@ function App() {
             element={
               <div>
                 <div className="hacker-top-left">
-                  <HackerTyper />
+                  {/*<HackerTyper />*/}
                 </div>               
                 <div>
                   {/* Updated link with HashRouter */}

@@ -1,0 +1,13 @@
+/* src/components/HackerTyper/HackerTyper.css */
+
+.hacker-typer-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 10px;
+  color: #0f0;
+  font-family: monospace;
+  white-space: pre; 
+}
+
