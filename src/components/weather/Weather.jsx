@@ -1,5 +1,5 @@
 // src/components/weather/Weather.jsx
-import { useReducer } from 'react';
+import { useReducer, useState, useEffect, useCallback } from 'react';
 import AsyncSelect from 'react-select/async';
 import '../weather/Weather.css';
 
@@ -31,15 +31,28 @@ function reducer(state, action) {
 
 function Weather() {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [inputValue, setInputValue] = useState('');
+  const [debouncedInput, setDebouncedInput] = useState('');
 
-  const loadCities = async (inputValue) => {
-    if (!inputValue) return [];
+  // Debounce input value (wait 1 second after typing stops before making the request)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedInput(inputValue);
+    }, 1000);
+
+    return () => clearTimeout(timer); // Clean up the timeout on each render
+  }, [inputValue]);
+
+  // Memoize the loadCities function with useCallback
+  const loadCities = useCallback(async (inputValue) => {
+    if (!inputValue || inputValue.length < 4) return []; // Minimum 4 characters
+
     try {
       const res = await fetch(
         `https://wft-geo-db.p.rapidapi.com/v1/geo/cities?limit=10&countryIds=US&namePrefix=${encodeURIComponent(inputValue)}`,
         {
           headers: {
-            'X-RapidAPI-Key': 'e18c3a420amshcb93b5ed2c060dap1a7b49jsnbd9a6f0bf369',
+            'X-RapidAPI-Key': import.meta.env.VITE_RAPIDAPI_KEY, 
             'X-RapidAPI-Host': 'wft-geo-db.p.rapidapi.com',
           },
         }
@@ -47,7 +60,7 @@ function Weather() {
       const json = await res.json();
       return json.data.map((city) => ({
         value: city.id,
-        label: `${city.name}, ${city.regionCode}`,
+        label: `${city.name}, ${city.regionCode}`, // Show city and region
         lat: city.latitude,
         lon: city.longitude,
       }));
@@ -55,16 +68,25 @@ function Weather() {
       dispatch({ type: 'SET_ERROR', payload: `City lookup failed: ${e.message}` });
       return [];
     }
-  };
+  }, []);  // Empty array ensures loadCities is only created once
 
-  const handleCitySelect = async (option) => {
+  // Use the debounced value of the input to trigger city lookup
+  useEffect(() => {
+    if (debouncedInput) {
+      loadCities(debouncedInput); // Call loadCities when debouncedInput is ready
+    }
+  }, [debouncedInput, loadCities]);
+
+  // Handle city selection
+  const handleCitySelect = async (cityOption) => {
     dispatch({ type: 'START_LOADING' });
-    dispatch({ type: 'SELECT_CITY', payload: option });
-    dispatch({ type: 'SET_COORDS', payload: { lat: option.lat, lon: option.lon } });
+    dispatch({ type: 'SELECT_CITY', payload: cityOption });
+    dispatch({ type: 'SET_COORDS', payload: { lat: cityOption.lat, lon: cityOption.lon } });
 
     try {
       const res = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${option.lat}&longitude=${option.lon}&current_weather=true&temperature_unit=fahrenheit`
+        `https://api.open-meteo.com/v1/forecast?latitude=${cityOption.lat}`
+        + `&longitude=${cityOption.lon}&current_weather=true&temperature_unit=fahrenheit`
       );
       const data = await res.json();
       dispatch({ type: 'SET_TEMP', payload: data.current_weather.temperature });
@@ -80,10 +102,11 @@ function Weather() {
       {state.error && <p className="error">{state.error}</p>}
       <AsyncSelect
         cacheOptions
-        loadOptions={loadCities}
+        loadOptions={loadCities}  // This is used to handle city selection in AsyncSelect
         onChange={handleCitySelect}
         placeholder="Start typing a city..."
         isDisabled={state.loading}
+        onInputChange={setInputValue} // Update inputValue as the user types
       />
       {state.temp !== null && state.city && (
         <p>
