@@ -1,3 +1,6 @@
+ed25519 2025-05-28 [SC] [expires: 2026-05-28]
+Mike Yep (Public Key for secure contact) <secure@mikeyep.com>
+
 Fingerprint: F0DE BB94 B7F8 C051 4E5B  3D79 1A84 57F7 BAE9 C6DA
 
 -----BEGIN PGP PUBLIC KEY BLOCK-----
