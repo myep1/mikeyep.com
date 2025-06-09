@@ -5,8 +5,7 @@ import Crypto from '../Crypto/Crypto';
 
 function Dashboard() {
   return (
-    <div className="dashboard-container">
-      <h2>Dashboard</h2>
+    <div className="dashboard-container">      
       <nav>
         <Link to="/">Home</Link>
         {' | '}
@@ -14,7 +13,6 @@ function Dashboard() {
         {' | '}
         <Link to="/dashboard/crypto">Crypto</Link>
       </nav>
-
       <Routes>
         <Route path="weather" element={<Weather />} />
         <Route path="crypto" element={<Crypto />} />

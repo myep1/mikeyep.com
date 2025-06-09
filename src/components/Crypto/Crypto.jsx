@@ -11,13 +11,11 @@ const Crypto = () => {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-
   const enc = new TextEncoder();
   const dec = new TextDecoder();
 
   const toBase64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
-  const fromBase64 = (b64) =>
-    Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+  const fromBase64 = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
 
   const getKeyFromPassword = async (pwd, salt) => {
     const baseKey = await crypto.subtle.importKey(
@@ -101,7 +99,7 @@ const Crypto = () => {
         placeholder="Plaintext"
         value={plaintext}
         onChange={(e) => setPlaintext(e.target.value)}
-        rows={3}
+        rows={4}
         style={{ width: "100%", marginBottom: "0.5rem" }}
       />
       <button onClick={doEncrypt}>Encrypt</button>
@@ -110,7 +108,7 @@ const Crypto = () => {
         placeholder="Ciphertext (salt.iv.ct)"
         value={ciphertext}
         onChange={(e) => setCiphertext(e.target.value)}
-        rows={3}
+        rows={4}
         style={{ width: "100%", marginTop: "0.5rem", marginBottom: "0.5rem" }}
       />
       <button onClick={doDecrypt}>Decrypt</button>
@@ -119,7 +117,7 @@ const Crypto = () => {
         placeholder="Decrypted plaintext"
         value={decrypted}
         readOnly
-        rows={3}
+        rows={4}
         style={{ width: "100%", marginTop: "0.5rem" }}
       />
       {error && <div style={{ color: "red", marginTop: "0.5rem" }}>{error}</div>}
