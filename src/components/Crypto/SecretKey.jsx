@@ -4,19 +4,10 @@ export default function SecretKey({ onPassword, preset }) {
   const [password, setPassword] = useState(preset || "");
   const [show, setShow] = useState(false);
 
- useEffect(() => {
-  if (!password) return;
+  useEffect(() => {
+    if (password) onPassword(password);
+  }, [password, onPassword]);
 
-  const derive = async () => {
-    // ...derive key
-    onKeyReady?.({ key, salt, iv });
-  };
-
-  derive();
-}, [password, salt, iv, onKeyReady]);
-
-
-  // if preset is provided, skip rendering UI
   if (preset) return null;
 
   return (

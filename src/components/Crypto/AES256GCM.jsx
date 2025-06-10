@@ -1,12 +1,12 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import SecretKey from "./SecretKey";
 
-export default function AES256GCM({ children, onKeyReady, defaultPassword }) {
-  const [password, setPassword] = useState(null);
-  const [key, setKey] = useState(null);
+export default function AES256GCM({ onKeyReady, defaultPassword, children }) {
+  const [password, setPassword] = useState(defaultPassword || "");
+  const [keyInfo, setKeyInfo] = useState(null);
 
-  const salt = useMemo(() => crypto.getRandomValues(new Uint8Array(12)), []);
-  const iv = useMemo(() => crypto.getRandomValues(new Uint8Array(16)), []);
+  const salt = useMemo(() => crypto.getRandomValues(new Uint8Array(16)), []);
+  const iv = useMemo(() => crypto.getRandomValues(new Uint8Array(12)), []);
 
   useEffect(() => {
     if (!password) return;
@@ -21,8 +21,9 @@ export default function AES256GCM({ children, onKeyReady, defaultPassword }) {
         false,
         ["encrypt", "decrypt"]
       );
-      setKey(derivedKey);
-      onKeyReady?.({ key: derivedKey, salt, iv });
+      const result = { key: derivedKey, salt, iv };
+      setKeyInfo(result);
+      onKeyReady?.(result);
     };
 
     deriveKey();
@@ -30,8 +31,8 @@ export default function AES256GCM({ children, onKeyReady, defaultPassword }) {
 
   return (
     <>
-      <SecretKey onPassword={setPassword} defaultPassword={defaultPassword} />
-      {key && typeof children === "function" ? children({ key, salt, iv }) : null}
+      <SecretKey onPassword={setPassword} preset={defaultPassword} />
+      {keyInfo && children?.(keyInfo)}
     </>
   );
 }
