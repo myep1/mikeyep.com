@@ -1,12 +1,12 @@
 import { useState, useMemo, useEffect } from "react";
 import SecretKey from "./SecretKey";
 
-export default function AES256GCM({ children, onKeyReady }) {
+export default function AES256GCM({ children, onKeyReady, defaultPassword }) {
   const [password, setPassword] = useState(null);
   const [key, setKey] = useState(null);
 
   const salt = useMemo(() => crypto.getRandomValues(new Uint8Array(12)), []);
-  const iv   = useMemo(() => crypto.getRandomValues(new Uint8Array(16)), []);
+  const iv = useMemo(() => crypto.getRandomValues(new Uint8Array(16)), []);
 
   useEffect(() => {
     if (!password) return;
@@ -26,11 +26,11 @@ export default function AES256GCM({ children, onKeyReady }) {
     };
 
     deriveKey();
-  }, [password]);
+  }, [password, salt, iv, onKeyReady]);
 
   return (
     <>
-      <SecretKey onPassword={setPassword} />
+      <SecretKey onPassword={setPassword} defaultPassword={defaultPassword} />
       {key && typeof children === "function" ? children({ key, salt, iv }) : null}
     </>
   );
