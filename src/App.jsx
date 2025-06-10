@@ -24,7 +24,7 @@ function App() {
                 </div>
                 <div className="footer-block">
                   <div className="footer-links">
-                    <a href="#/2048">Play 2048 (Original)</a>
+                    <a href="#/2048">2048</a>
                     <a href="#/dashboard">Dashboard</a>
                     <a href="/gpg.txt" target="_blank">GPG Key</a>
                     <a href="https://www.linkedin.com/in/mike-yep" target="_blank">Linkedin Profile</a>
