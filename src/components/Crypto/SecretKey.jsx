@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 
-export default function SecretKey({ onPassword, preset }) {
-  const [password, setPassword] = useState(preset || "");
+export default function SecretKey({ onPassword, preset, children }) {
+  const raw = (children || "").toString().trim();
+  const [password, setPassword] = useState(preset || raw || "");
   const [show, setShow] = useState(false);
 
   useEffect(() => {
     if (password) onPassword(password);
   }, [password, onPassword]);
 
-  if (preset) return null;
+  if (preset || raw) return null;
 
   return (
     <div style={{ display: "flex", marginBottom: "0.5rem" }}>
