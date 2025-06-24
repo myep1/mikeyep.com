@@ -1,9 +1,35 @@
-import { useState, useEffect, useMemo } from "react";
+// Decrypt.jsx
+import { useState, useEffect } from "react";
 
-export default function Decrypter({ children }) {
-  const [ciphertext, setCiphertext] = useState("");
-  const [plaintext, setPlaintext] = useState("");
-  const [error, setError] = useState("");
+export default function Decrypt({ keyInfo, children }) {
+    const [ciphertext, setCiphertext] = useState("");
+ 
+  const dec = new TextDecoder();
+
+  useEffect(() => {
+    if (!children) return;
+
+    const decryptText = async (str) => {
+      try {
+        const parts = str.trim().split("$");
+        const [, , , , , ctB64] = parts;
+        const ct = Uint8Array.from(atob(ctB64), (c) => c.charCodeAt(0));
+        const pt = await crypto.subtle.decrypt({ name: "AES-CFB", iv: keyInfo.iv }, keyInfo.key, ct);
+        setPlaintext(dec.decode(pt));
+      } catch (e) {
+        setError("Decryption failed: " + e.message);
+      }
+    };
+
+    decryptText(children.toString().trim());
+  }, [children, keyInfo]);
+
+  return <pre>{error || plaintext}</pre>;
+}
+
+
+
+
   const fromBase64 = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
   const dec = useMemo(() => new TextDecoder(), []);
 
