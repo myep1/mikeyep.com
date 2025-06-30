@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function Decrypter() {
+export default function Decrypt() {
   const [ciphertext, setCiphertext] = useState("");
   const [decrypted, setDecrypted] = useState("");
   const [error, setError] = useState("");

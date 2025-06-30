@@ -1,7 +1,7 @@
 import { useState } from "react";
 import AES256GCM from "./AES256GCM";
 
-function Encrypter() {
+function Encrypt() {
   const [keyInfo, setKeyInfo] = useState(null);
   const [plaintext, setPlaintext] = useState("");
   const [ciphertext, setCiphertext] = useState("");
@@ -43,4 +43,4 @@ function Encrypter() {
     </AES256GCM>
   );  
 }
-export default Encrypter;
+export default Encrypt;

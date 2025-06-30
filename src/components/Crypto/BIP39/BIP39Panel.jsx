@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { Buffer } from "buffer";
 import * as bip39 from "bip39";
 import BIP39SelectorSet from "./BIP39SelectorSet";
 
 window.Buffer = Buffer;
 
-export default function BIP39Panel({ count }) {
-  const [words, setWords] = useState(Array(count).fill(""));
+const BIP39Panel = forwardRef(({ count: forcedCount }, ref) => {
+  const [mode, setMode] = useState(forcedCount || 12);
+  const [words, setWords] = useState(Array(mode).fill(""));
   const [hex, setHex] = useState("");
   const [bits, setBits] = useState("");
   const [error, setError] = useState("");
@@ -18,7 +19,7 @@ export default function BIP39Panel({ count }) {
   };
 
   const generateRandom = () => {
-    const entropyBytes = count === 12 ? 16 : 32; // 128 or 256 bits
+    const entropyBytes = mode === 12 ? 16 : 32;
     const entropy = Buffer.from(crypto.getRandomValues(new Uint8Array(entropyBytes))).toString("hex");
     console.log("Generated hex:", entropy);
     setHex(entropy);
@@ -49,15 +50,12 @@ export default function BIP39Panel({ count }) {
 
   useEffect(() => {
     if (hex.length) {
-      console.log("HEX updated:", hex);
       const validLengths = {
         12: 32,
         24: 64,
       };
-      const neededLength = validLengths[count];
-      if (neededLength && hex.length !== neededLength) {
-        return; // Don't attempt until hex is the correct length for the word count
-      }
+      const neededLength = validLengths[mode];
+      if (neededLength && hex.length !== neededLength) return;
       try {
         const mnemonic = bip39.entropyToMnemonic(hex);
         const newWords = mnemonic.split(" ");
@@ -75,16 +73,52 @@ export default function BIP39Panel({ count }) {
         setError("BAD CHECKSUM");
       }
     }
-  }, [hex, count]);
+  }, [hex, mode]);
+
+  useEffect(() => {
+    setWords(Array(mode).fill(""));
+    setHex("");
+    setBits("");
+    setError("");
+  }, [mode]);
+
+  useImperativeHandle(ref, () => ({
+    async getSecretKey(passphrase = "") {
+      const mnemonic = words.join(" ");
+      if (!bip39.validateMnemonic(mnemonic)) throw new Error("Invalid mnemonic");
+      const seed = await bip39.mnemonicToSeed(mnemonic, passphrase);
+      return new Uint8Array(seed).subarray(0, 32); // 256-bit key
+    }
+  }));
 
   return (
     <div>
-      <button onClick={generateRandom}>Generate Random</button>
+      {!forcedCount && (
+        <div>
+          <label>
+            <input
+              type="radio"
+              checked={mode === 12}
+              onChange={() => setMode(12)}
+            />
+            12 words
+          </label>
+          <label style={{ marginLeft: "1rem" }}>
+            <input
+              type="radio"
+              checked={mode === 24}
+              onChange={() => setMode(24)}
+            />
+            24 words
+          </label>
+        </div>
+      )}
+      <button onClick={generateRandom}>Generate</button>
       <BIP39SelectorSet
-        count={count}
+        count={mode}
         values={words}
         onChange={handleChange}
-        key={words.join("-")} // re-render when words change
+        key={words.join("-")}
       />
       <label>Hex:</label>
       <input
@@ -107,4 +141,6 @@ export default function BIP39Panel({ count }) {
       {error && <div style={{ color: "red" }}>{error}</div>}
     </div>
   );
-}
+});
+
+export default BIP39Panel;
