@@ -5,6 +5,8 @@ function Encrypt() {
   const [keyInfo, setKeyInfo] = useState(null);
   const [plaintext, setPlaintext] = useState("");
   const [ciphertext, setCiphertext] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const enc = new TextEncoder();
   const toBase64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
@@ -21,9 +23,21 @@ function Encrypt() {
   };
 
   return (
-    <AES256GCM onKeyReady={setKeyInfo}>
+      <AES256GCM onKeyReady={setKeyInfo} password={password}>
       {() => (
         <div>
+          <div style={{ display: "flex", alignItems: "center", marginBottom: "0.5rem" }}>
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{ width: "100%" }}
+            />
+            <button onClick={() => setShowPassword((v) => !v)} style={{ marginLeft: "0.5rem" }}>
+              {showPassword ? "👁️" : "🔒"}
+            </button>
+          </div>
           <textarea
             value={plaintext}
             onChange={(e) => setPlaintext(e.target.value)}
@@ -31,7 +45,7 @@ function Encrypt() {
             rows={4}
             style={{ width: "100%" }}
           />
-          <button onClick={encrypt}>Encrypt</button>
+          <button onClick={encrypt} style={{ marginTop: "0.5rem" }}>Encrypt</button>
           <textarea
             value={ciphertext}
             readOnly
@@ -41,6 +55,7 @@ function Encrypt() {
         </div>
       )}
     </AES256GCM>
-  );  
+  );
 }
+
 export default Encrypt;
