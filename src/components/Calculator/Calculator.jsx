@@ -1,15 +1,8 @@
 import { useReducer } from 'react';
+import { ACTIONS } from './actions.js';
 import './Calculator.css';
 import DigitButton from './DigitButton';
 import OperationButton from './OperationButton';
-
-export const ACTIONS = {
-  ADD_DIGIT: 'add-digit',
-  CHOOSE_OPERATION: 'choose-operation',
-  CLEAR: 'clear',
-  DELETE_DIGIT: 'delete-digit',
-  EVALUATE: 'evaluate'
-}
 
 function reducer(state, { type, payload }){
   switch(type){
@@ -134,6 +127,7 @@ function Calculator() {
   const [{ currentOperand, previousOperand, operation }, dispatch] = useReducer(reducer, {})
  
   return (
+    <div className='calculator-wrapper'>
     <div className="calculator-grid">
       <div className="output">
         <div className="previous-operand">{formatOperand(previousOperand)} {operation}</div>
@@ -170,7 +164,7 @@ function Calculator() {
       >
         =
       </button>
-
+    </div>
     </div>
   );
 }

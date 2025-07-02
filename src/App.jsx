@@ -4,6 +4,7 @@ import './App.css';
 import Game from './2048/Game'; // Original working game component
 import HackerTyper from './components/HackerTyper/HackerTyper';
 import Dashboard from './components/dashboard/Dashboard';
+import Calculator from './components/Calculator/Calculator';
 
 function App() {
   const deployTimestamp = import.meta.env.VITE_DEPLOY_TIMESTAMP; 
@@ -36,6 +37,7 @@ function App() {
             }
           />
           <Route path="/2048" element={<Game />} />
+          <Route path="/calc" element={<Calculator />} />
           <Route path="/dashboard/*" element={<Dashboard />} />
         </Routes>
       </div>
