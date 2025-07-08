@@ -3,5 +3,8 @@ export const ACTIONS = {
   CHOOSE_OPERATION: 'choose-operation',
   CLEAR: 'clear',
   DELETE_DIGIT: 'delete-digit',
-  EVALUATE: 'evaluate'
+  EVALUATE: 'evaluate',
+  CHANGE_SIGN: 'change-sign',
+  ADD_EXPONENT: 'add-exponent',
+  NOOP: 'noop'
 };

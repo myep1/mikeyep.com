@@ -25,10 +25,12 @@ img, video {
   display: block;
 }
 
-/* Set base font and color */
-body {
-  line-height: 1.5;
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: black;
+  color: #fff;
   font-family: sans-serif;
-  background-color: #fff;
-  color: #000;
+  line-height: 1.5;
 }

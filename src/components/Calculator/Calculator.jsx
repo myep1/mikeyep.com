@@ -6,6 +6,10 @@ import OperationButton from './OperationButton';
 
 function reducer(state, { type, payload }){
   switch(type){
+    case ACTIONS.NOOP:
+      return {
+        ...state
+      }
     case ACTIONS.ADD_DIGIT:
       if(state.overwrite){
         return {
@@ -26,6 +30,15 @@ function reducer(state, { type, payload }){
         ...state,
         currentOperand: `${state.currentOperand || ""}${payload.digit}`
       }
+    case ACTIONS.CHANGE_SIGN: {
+      if (state.currentOperand == null) return state;
+      const current = parseFloat(state.currentOperand);
+      const toggled = (-current).toString();
+      return {
+        ...state,
+        currentOperand: toggled,
+      }
+    }
     case ACTIONS.CHOOSE_OPERATION:
       if(state.currentOperand == null && state.previousOperand == null) {
         return state
@@ -93,34 +106,47 @@ const INTEGER_FORMATTER = new Intl.NumberFormat("en-us", {
   maximumFractionDigits: 0,
 })
 
-function formatOperand(operand){
-  if(operand == null) return
-  const [ integer, decimal] = operand.split('.')
-  if(decimal == null) return INTEGER_FORMATTER.format(integer)
-  return `${INTEGER_FORMATTER.format(integer)}.${decimal}`
-}
-
-function evaluate({ currentOperand, previousOperand, operation}){
-  const prev = parseFloat(previousOperand)
-  const curent = parseFloat(currentOperand)
-  if(isNaN(prev) || isNaN(curent)) return ""
-  let computation = ""
-  switch(operation){
-    case "+":
-      computation = prev + curent
-      break
-    case "-":
-      computation = prev - curent
-      break
-    case "*":
-      computation = prev * curent
-      break
-    case "÷":
-      computation = prev / curent
-      break
+function formatOperand(operand) {
+  if (operand == null) return;
+  const num = Number(operand);
+  if (Math.abs(num) > 99999999999999) {
+    return num.toExponential(10);
   }
 
-  return computation.toString()
+  const [integer, decimal] = operand.split('.');
+  if (decimal == null) return INTEGER_FORMATTER.format(integer);
+  return `${INTEGER_FORMATTER.format(integer)}.${decimal}`;
+}
+
+function evaluate({ currentOperand, previousOperand, operation }) {
+  const prev = parseFloat(previousOperand);
+  const current = parseFloat(currentOperand);
+  if (isNaN(prev) || isNaN(current)) return "";
+
+  let computation = "";
+  switch (operation) {
+    case "+":
+      computation = prev + current;
+      break;
+    case "-":
+      computation = prev - current;
+      break;
+    case "*":
+      computation = prev * current;
+      break;
+    case "÷":
+      computation = prev / current;
+      break;
+    case "mod":
+      computation = prev % current;
+      break;
+  }
+
+  if (!isFinite(computation) || Math.abs(computation) > 1e308) {
+    return "Overflow";
+  }
+
+  return computation.toString();
 }
 
 function Calculator() {
@@ -133,16 +159,13 @@ function Calculator() {
         <div className="previous-operand">{formatOperand(previousOperand)} {operation}</div>
         <div className="current-operand">{formatOperand(currentOperand)}</div>
       </div>
-      <button 
-        className="span-two"
-        onClick={() => dispatch({ type: ACTIONS.CLEAR })}
-        >
-          AC
-      </button>
-      <button
-       onClick={() => dispatch({ type: ACTIONS.DELETE_DIGIT })}>
-        DEL
-        </button>
+      <button onClick={() => dispatch({ type: ACTIONS.CLEAR })}>AC</button>
+      <button onClick={() => dispatch({ type: ACTIONS.DELETE_DIGIT })}>DEL</button>
+      <OperationButton operation="mod" dispatch={dispatch} />
+      <button onClick={() => dispatch({ type: ACTIONS.CHANGE_SIGN })}>-/+</button>
+      <button onClick={() => dispatch({ type: ACTIONS.ADD_EXPONENT })}>E</button>
+      <button onClick={() => dispatch({ type: ACTIONS.NOOP })}>X</button>
+      <button onClick={() => dispatch({ type: ACTIONS.NOOP })}>Y</button>
       <OperationButton operation="÷" dispatch={dispatch} />
       <DigitButton digit="1" dispatch={dispatch} />
       <DigitButton digit="2" dispatch={dispatch} />
@@ -158,12 +181,7 @@ function Calculator() {
       <OperationButton operation="-" dispatch={dispatch} />
       <DigitButton digit="." dispatch={dispatch} />
       <DigitButton digit="0" dispatch={dispatch} />
-      <button 
-        className="span-two"
-        onClick={() => dispatch({ type: ACTIONS.EVALUATE })}
-      >
-        =
-      </button>
+      <button className="span-two" onClick={() => dispatch({ type: ACTIONS.EVALUATE })}>=</button>
     </div>
     </div>
   );
