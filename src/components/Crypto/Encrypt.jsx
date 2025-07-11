@@ -1,115 +1,104 @@
 import { useState, useRef } from "react";
 import SecretKey from "./SecretKey";
+import BIP39Panel from "./BIP39/BIP39Panel";
 
-function Encrypt() {
-  const secretKeyRef = useRef();
+export default function Encrypt() {
   const [plaintext, setPlaintext] = useState("");
   const [ciphertext, setCiphertext] = useState("");
-  const [mode, setMode] = useState("text");
-  const [file, setFile] = useState(null);
+  const [mode, setMode] = useState("ascii"); // "ascii" or "bip39"
+  const asciiRef = useRef();
+  const bip39Ref = useRef();
 
-  const enc = new TextEncoder();
-  const toBase64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+  const handleEncrypt = async () => {
+    let keyData;
 
-  const formatCiphertext = (salt, iv, ct) =>
-    `@aes256gcm$pbkdf2$100000$${toBase64(salt)}$${toBase64(iv)}$${toBase64(ct)}`;
+    if (mode === "ascii") {
+      keyData = await asciiRef.current?.getKey();
+      console.log("[Encrypt] ASCII keyData:", keyData);
+      if (!keyData) return alert("Missing ASCII key info");
+    } else {
+      const passphrase = asciiRef.current?.getPassword?.() || "";
+      try {
+        const rawKey = await bip39Ref.current?.getSecretKey(passphrase);
+        if (!rawKey) throw new Error("Invalid BIP39 key");
+        const cryptoKey = await crypto.subtle.importKey(
+          "raw",
+          rawKey,
+          { name: "AES-GCM" },
+          false,
+          ["encrypt", "decrypt"]
+        );
+        keyData = { key: cryptoKey, salt: null, iv: null };
+        console.log("[Encrypt] BIP39 keyData:", keyData);
+      } catch (err) {
+        console.error("[Encrypt] BIP39 Error:", err);
+        return alert("BIP39 Error: " + err.message);
+      }
+    }
 
-  const encryptText = async () => {
-    const keyInfo = await secretKeyRef.current?.getKey();
-    if (!keyInfo) return;
-    const { key, salt, iv } = keyInfo;
+    const enc = new TextEncoder();
     const ptBytes = enc.encode(plaintext);
-    const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, ptBytes);
-    setCiphertext(formatCiphertext(salt, iv, ct));
-  };
+    const { key, salt, iv } = keyData;
+    if (!key) {
+      console.error("[Encrypt] SubtleCrypto.encrypt key is undefined");
+      return alert("Encryption key is missing");
+    }
 
-  const encryptFile = async () => {
-    const keyInfo = await secretKeyRef.current?.getKey();
-    if (!file || !keyInfo) return;
-    const { key, salt, iv } = keyInfo;
-    const arrayBuffer = await file.arrayBuffer();
-    const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, arrayBuffer);
+    const ivActual = iv || crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv: ivActual }, key, ptBytes);
+    const ctBytes = new Uint8Array(ct);
 
-    const s = new Uint8Array(salt);
-    const v = new Uint8Array(iv);
-    const c = new Uint8Array(ct);
-    const combined = new Uint8Array(s.length + v.length + c.length);
-    combined.set(s, 0);
-    combined.set(v, s.length);
-    combined.set(c, s.length + v.length);
+    const header = {
+      algo: "AES-256-GCM",
+      kdf: salt ? "PBKDF2" : "BIP39",
+      iterations: salt ? 100000 : 0,
+      iv: btoa(String.fromCharCode(...ivActual)),
+      salt: salt ? btoa(String.fromCharCode(...salt)) : null
+    };
 
-    const blob = new Blob([combined], { type: "application/octet-stream" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `${file.name}.enc`;
-    a.click();
-    URL.revokeObjectURL(a.href);
+    const combined = `${btoa(JSON.stringify(header))}\n${btoa(String.fromCharCode(...ctBytes))}`;
+    setCiphertext(combined);
   };
 
   return (
     <div>
-      {/* Key input */}
-      <SecretKey ref={secretKeyRef} />
-
-      {/* Mode Toggle */}
       <div style={{ marginBottom: "0.5rem" }}>
         <label>
           <input
             type="radio"
-            value="text"
-            checked={mode === "text"}
-            onChange={() => setMode("text")}
-          /> Text
+            checked={mode === "ascii"}
+            onChange={() => setMode("ascii")}
+          />
+          ASCII
         </label>
         <label style={{ marginLeft: "1rem" }}>
           <input
             type="radio"
-            value="file"
-            checked={mode === "file"}
-            onChange={() => setMode("file")}
-          /> File
+            checked={mode === "bip39"}
+            onChange={() => setMode("bip39")}
+          />
+          BIP39
         </label>
       </div>
 
-      {/* Text Mode */}
-      {mode === "text" && (
-        <>
-          <textarea
-            value={plaintext}
-            onChange={(e) => setPlaintext(e.target.value)}
-            placeholder="Enter plaintext"
-            rows={4}
-            style={{ width: "100%" }}
-          />
-          <button onClick={encryptText} style={{ marginTop: "0.5rem" }}>Encrypt</button>
-          <textarea
-            value={ciphertext}
-            readOnly
-            rows={4}
-            style={{ width: "100%", marginTop: "0.5rem" }}
-          />
-        </>
-      )}
+      {mode === "ascii" && <SecretKey ref={asciiRef} />}
+      {mode === "bip39" && <BIP39Panel ref={bip39Ref} />}
 
-      {/* File Mode */}
-      {mode === "file" && (
-        <>
-          <input
-            type="file"
-            onChange={(e) => setFile(e.target.files[0])}
-            style={{ marginTop: "0.5rem" }}
-          />
-          <button
-            onClick={encryptFile}
-            disabled={!file}
-            style={{ marginTop: "0.5rem", display: "block" }}
-          >
-            Encrypt & Download
-          </button>
-        </>
-      )}
+      <textarea
+        placeholder="Plaintext"
+        rows={4}
+        value={plaintext}
+        onChange={(e) => setPlaintext(e.target.value)}
+        style={{ width: "100%", marginBottom: "0.5rem" }}
+      />
+      <button onClick={handleEncrypt}>Encrypt</button>
+      <textarea
+        placeholder="Ciphertext Output"
+        rows={10}
+        value={ciphertext}
+        readOnly
+        style={{ width: "100%", marginTop: "0.5rem" }}
+      />
     </div>
   );
 }
-
-export default Encrypt;

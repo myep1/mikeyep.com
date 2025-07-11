@@ -1,122 +1,92 @@
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import SecretKey from "./SecretKey";
+import BIP39Panel from "./BIP39/BIP39Panel";
 
 export default function Decrypt() {
-  const secretKeyRef = useRef();
   const [ciphertext, setCiphertext] = useState("");
-  const [decrypted, setDecrypted] = useState("");
-  const [error, setError] = useState("");
-  const [file, setFile] = useState(null);
-  const [mode, setMode] = useState("text");
+  const [plaintext, setPlaintext] = useState("");
+  const [mode, setMode] = useState("ascii");
+  const asciiRef = useRef();
+  const bip39Ref = useRef();
 
-  const fromBase64 = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-  const dec = new TextDecoder();
+  const handleDecrypt = async () => {
+    const [headerB64, ctB64] = ciphertext.split("\n");
+    if (!headerB64 || !ctB64) return alert("Invalid ciphertext format");
 
-  const decryptText = async () => {
-  setError("");
-  try {
-    const parts = ciphertext.trim().split("$");
-    if (parts.length !== 6 || parts[0] !== "@aes256gcm") throw new Error("Invalid format");
+    let header;
+    try {
+      header = JSON.parse(atob(headerB64));
+    } catch (e) {
+      return alert("Failed to parse header", e);
+    }
 
-    const [, , , saltB64, ivB64, ctB64] = parts;
-    const salt = fromBase64(saltB64);
-    const iv = fromBase64(ivB64);
-    const ct = fromBase64(ctB64);
+    const iv = new Uint8Array(atob(header.iv).split("").map(c => c.charCodeAt(0)));
+    const salt = header.salt ? new Uint8Array(atob(header.salt).split("").map(c => c.charCodeAt(0))) : null;
+    const ctBytes = new Uint8Array(atob(ctB64).split("").map(c => c.charCodeAt(0)));
 
-    const password = secretKeyRef.current.getPassword?.();
-    if (!password) throw new Error("No password");
+    let key;
+    try {
+      if (header.kdf === "PBKDF2") {
+        const keyData = await asciiRef.current?.deriveKey(asciiRef.current?.getPassword(), salt, iv);
+        key = keyData?.key;
+      } else if (header.kdf === "BIP39") {
+        const passphrase = asciiRef.current?.getPassword?.() || "";
+        const rawKey = await bip39Ref.current?.getSecretKey(passphrase);
+        key = await crypto.subtle.importKey("raw", rawKey, { name: "AES-GCM" }, false, ["decrypt"]);
+      } else {
+        return alert("Unknown KDF");
+      }
+    } catch (e) {
+      return alert("Key derivation failed: " + e.message);
+    }
 
-    const { key } = await secretKeyRef.current.deriveKey(password, salt, iv);
-    const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
-
-    setDecrypted(dec.decode(pt));
-  } catch (e) {
-    setError("Decryption failed: " + e.message);
-    setDecrypted("");
-  }
-};
-
-const decryptFile = async () => {
-  setError("");
-  if (!file) return;
-
-  try {
-    const buffer = await file.arrayBuffer();
-    const bytes = new Uint8Array(buffer);
-    const salt = bytes.slice(0, 16);
-    const iv = bytes.slice(16, 28);
-    const ct = bytes.slice(28);
-
-    const password = secretKeyRef.current.getPassword?.();
-    if (!password) throw new Error("No password");
-
-    const { key } = await secretKeyRef.current.deriveKey(password, salt, iv);
-    const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
-
-    const blob = new Blob([pt]);
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = file.name.replace(/\.enc$/, "") || "decrypted.out";
-    a.click();
-    URL.revokeObjectURL(a.href);
-  } catch (e) {
-    setError("Decryption failed: " + e.message);
-  }
-};
-
+    try {
+      const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ctBytes);
+      setPlaintext(new TextDecoder().decode(pt));
+    } catch (e) {
+      alert("Decryption failed: " + e.message);
+    }
+  };
 
   return (
     <div>
-      {/* Key input */}
-      <SecretKey ref={secretKeyRef} />
-
-      {/* Mode Toggle */}
       <div style={{ marginBottom: "0.5rem" }}>
         <label>
-          <input type="radio" value="text" checked={mode === "text"} onChange={() => setMode("text")} />
-          Text
+          <input
+            type="radio"
+            checked={mode === "ascii"}
+            onChange={() => setMode("ascii")}
+          />
+          ASCII
         </label>
         <label style={{ marginLeft: "1rem" }}>
-          <input type="radio" value="file" checked={mode === "file"} onChange={() => setMode("file")} />
-          File
+          <input
+            type="radio"
+            checked={mode === "bip39"}
+            onChange={() => setMode("bip39")}
+          />
+          BIP39
         </label>
       </div>
 
-      {/* Text Mode */}
-      {mode === "text" && (
-        <>
-          <textarea
-            value={ciphertext}
-            onChange={(e) => setCiphertext(e.target.value)}
-            placeholder="Paste ciphertext here"
-            rows={4}
-            style={{ width: "100%" }}
-          />
-          <button onClick={decryptText}>Decrypt</button>
-          <textarea
-            value={decrypted}
-            readOnly
-            rows={4}
-            style={{ width: "100%", marginTop: "0.5rem" }}
-          />
-        </>
-      )}
+      {mode === "ascii" && <SecretKey ref={asciiRef} />}
+      {mode === "bip39" && <BIP39Panel ref={bip39Ref} />}
 
-      {/* File Mode */}
-      {mode === "file" && (
-        <>
-          <input
-            type="file"
-            onChange={(e) => setFile(e.target.files[0])}
-            style={{ marginTop: "0.5rem" }}
-          />
-          <button onClick={decryptFile} disabled={!file} style={{ marginTop: "0.5rem", display: "block" }}>
-            Decrypt File
-          </button>
-        </>
-      )}
-
-      {error && <div style={{ color: "red", marginTop: "0.5rem" }}>{error}</div>}
+      <textarea
+        placeholder="Ciphertext Input"
+        rows={10}
+        value={ciphertext}
+        onChange={(e) => setCiphertext(e.target.value)}
+        style={{ width: "100%", marginBottom: "0.5rem" }}
+      />
+      <button onClick={handleDecrypt}>Decrypt</button>
+      <textarea
+        placeholder="Plaintext Output"
+        rows={4}
+        value={plaintext}
+        readOnly
+        style={{ width: "100%", marginTop: "0.5rem" }}
+      />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useImperativeHandle, forwardRef } from "rea
 import { Buffer } from "buffer";
 import * as bip39 from "bip39";
 import BIP39SelectorSet from "./BIP39SelectorSet";
+import { Eye, EyeOff, Lock } from "lucide-react"; // optional, or use emoji/icons
 
 window.Buffer = Buffer;
 
@@ -11,6 +12,8 @@ const BIP39Panel = forwardRef(({ count: forcedCount }, ref) => {
   const [hex, setHex] = useState("");
   const [bits, setBits] = useState("");
   const [error, setError] = useState("");
+  const [passphrase, setPassphrase] = useState("");
+  const [show, setShow] = useState(false);
 
   const handleChange = (index, word) => {
     const updated = [...words];
@@ -21,7 +24,6 @@ const BIP39Panel = forwardRef(({ count: forcedCount }, ref) => {
   const generateRandom = () => {
     const entropyBytes = mode === 12 ? 16 : 32;
     const entropy = Buffer.from(crypto.getRandomValues(new Uint8Array(entropyBytes))).toString("hex");
-    console.log("Generated hex:", entropy);
     setHex(entropy);
   };
 
@@ -37,25 +39,18 @@ const BIP39Panel = forwardRef(({ count: forcedCount }, ref) => {
           .padStart(entropy.length * 4, "0");
         setBits(binary);
         setError("");
-        console.log("Mnemonic to entropy:", entropy);
-        console.log("Updated binary:", binary);
       } catch (e) {
-        console.error("mnemonicToEntropy error:", e);
         setHex("");
         setBits("");
-        setError("BAD CHECKSUM");
+        setError("BAD CHECKSUM", e);
       }
     }
   }, [words]);
 
   useEffect(() => {
     if (hex.length) {
-      const validLengths = {
-        12: 32,
-        24: 64,
-      };
-      const neededLength = validLengths[mode];
-      if (neededLength && hex.length !== neededLength) return;
+      const validLengths = { 12: 32, 24: 64 };
+      if (hex.length !== validLengths[mode]) return;
       try {
         const mnemonic = bip39.entropyToMnemonic(hex);
         const newWords = mnemonic.split(" ");
@@ -65,12 +60,9 @@ const BIP39Panel = forwardRef(({ count: forcedCount }, ref) => {
           .padStart(hex.length * 4, "0");
         setBits(binary);
         setError("");
-        console.log("Entropy to mnemonic:", mnemonic);
-        console.log("Updated binary:", binary);
       } catch (e) {
-        console.error("entropyToMnemonic error:", e);
         setBits("");
-        setError("BAD CHECKSUM");
+        setError("BAD CHECKSUM", e);
       }
     }
   }, [hex, mode]);
@@ -83,12 +75,12 @@ const BIP39Panel = forwardRef(({ count: forcedCount }, ref) => {
   }, [mode]);
 
   useImperativeHandle(ref, () => ({
-    async getSecretKey(passphrase = "") {
+    async getSecretKey() {
       const mnemonic = words.join(" ");
       if (!bip39.validateMnemonic(mnemonic)) throw new Error("Invalid mnemonic");
       const seed = await bip39.mnemonicToSeed(mnemonic, passphrase);
-      return new Uint8Array(seed).subarray(0, 32); // 256-bit key
-    }
+      return new Uint8Array(seed).subarray(0, 32);
+    },
   }));
 
   return (
@@ -120,6 +112,22 @@ const BIP39Panel = forwardRef(({ count: forcedCount }, ref) => {
         onChange={handleChange}
         key={words.join("-")}
       />
+      <label>Optional passphrase:</label>
+      <div style={{ display: "flex", alignItems: "center", marginBottom: "0.5rem" }}>
+        <input
+          type={show ? "text" : "password"}
+          value={passphrase}
+          onChange={(e) => setPassphrase(e.target.value)}
+          placeholder="passphrase"
+          style={{ flex: 1 }}
+        />
+        <button
+          onClick={() => setShow((prev) => !prev)}
+          style={{ marginLeft: "0.5rem" }}
+        >
+          {show ? <Eye size={16} /> : <Lock size={16} />}
+        </button>
+      </div>
       <label>Hex:</label>
       <input
         value={hex}

@@ -1,9 +1,12 @@
 import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
+import { Eye, Lock } from "lucide-react";
+import BIP39Panel from "./BIP39/BIP39Panel";
 
-const SecretKey = forwardRef(({ preset }, ref) => {
+const SecretKey = forwardRef(({ preset, mode = "ascii" }, ref) => {
   const [password, setPassword] = useState(preset || "");
   const [show, setShow] = useState(false);
   const [keyInfo, setKeyInfo] = useState(null);
+  const [bipRef, setBipRef] = useState(null);
 
   const deriveKey = async (pw) => {
     const enc = new TextEncoder();
@@ -26,13 +29,13 @@ const SecretKey = forwardRef(({ preset }, ref) => {
     if (preset) {
       deriveKey(preset);
     }
-  }, [preset]); // ✅ included as dependency
+  }, [preset]);
 
   useEffect(() => {
-    if (!preset && password) {
+    if (!preset && password && mode === "ascii") {
       deriveKey(password);
     }
-  }, [password, preset]); // ✅ now satisfies linter
+  }, [password, preset, mode]);
 
   useImperativeHandle(ref, () => ({
     async deriveKey(password, salt, iv) {
@@ -48,7 +51,11 @@ const SecretKey = forwardRef(({ preset }, ref) => {
       return { key: derivedKey, salt, iv };
     },
 
-    getKey() {
+    async getKey() {
+      if (mode === "bip39" && bipRef?.current) {
+        const key = await bipRef.current.getSecretKey(password);
+        return { key, salt: new Uint8Array(16), iv: new Uint8Array(12) }; // placeholder salt/iv
+      }
       return keyInfo;
     },
 
@@ -60,15 +67,23 @@ const SecretKey = forwardRef(({ preset }, ref) => {
   if (preset) return null;
 
   return (
-    <div style={{ display: "flex", marginBottom: "0.5rem" }}>
-      <input
-        type={show ? "text" : "password"}
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Enter password"
-        style={{ flex: 1 }}
-      />
-      <button onClick={() => setShow((s) => !s)}>{show ? "👁️" : "🔒"}</button>
+    <div style={{ marginBottom: "0.5rem" }}>
+      {mode === "ascii" && (
+        <div style={{ display: "flex" }}>
+          <input
+            type={show ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter password (optional)"
+            style={{ flex: 1 }}
+          />
+          <button onClick={() => setShow((s) => !s)}>{show ? <Eye size={16} /> : <Lock size={16} />}</button>
+        </div>
+      )}
+
+      {mode === "bip39" && (
+        <BIP39Panel ref={(r) => setBipRef({ current: r })} />
+      )}
     </div>
   );
 });
