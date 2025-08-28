@@ -1,22 +1,22 @@
-// src/App.jsx
+// src/App.tsx
 import { HashRouter as Router, Route, Routes } from 'react-router-dom';
-import './App.css'; 
-import Game from './2048/Game'; // Original working game component
+import './App.css';
+import Game from './2048/Game';
 import HackerTyper from './components/HackerTyper/HackerTyper';
 import Dashboard from './components/dashboard/Dashboard';
 
-function App() {
-  const deployTimestamp = import.meta.env.VITE_DEPLOY_TIMESTAMP; 
-  const deployType = import.meta.env.VITE_DEPLOY_TYPE; 
+function App(): JSX.Element {
+  const deployTimestamp = import.meta.env.VITE_DEPLOY_TIMESTAMP as string | undefined;
+  const deployType = import.meta.env.VITE_DEPLOY_TYPE as string | undefined;
+  const renderHackerTyper = import.meta.env.VITE_HACKER_TYPER as string | undefined; // "true"/"false"
   const year = new Date().getFullYear();
-  const renderHackerTyper = import.meta.env.VITE_HACKER_TYPER; 
 
   return (
     <Router>
       <div className="app-container">
         <Routes>
-          <Route 
-            path="/" 
+          <Route
+            path="/"
             element={
               <>
                 <div className="hacker-top-left">
@@ -26,8 +26,8 @@ function App() {
                   <div className="footer-links">
                     <a href="#/2048">2048</a>
                     <a href="#/dashboard">Dashboard</a>
-                    <a href="/gpg.txt" target="_blank">GPG Key</a>
-                    <a href="https://www.linkedin.com/in/mike-yep" target="_blank">Linkedin Profile</a>
+                    <a href="/gpg.txt" target="_blank" rel="noreferrer">GPG Key</a>
+                    <a href="https://www.linkedin.com/in/mike-yep" target="_blank" rel="noreferrer">Linkedin Profile</a>
                   </div>
                   <span>© {year} Mike Yep. All Rights Reserved.</span>
                   <p>{deployType}{deployTimestamp}</p>

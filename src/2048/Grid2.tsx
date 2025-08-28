@@ -1,8 +1,15 @@
-// src/2048/Grid2.jsx
-import React from "react";
+// src/2048/Grid2.tsx
+import { CSSProperties } from "react";
 
-const Grid2 = ({ gridSize, tiles }) => {
-  const gridStyle = {
+export type Tile = { x: number; y: number; value: number };
+
+type Props = {
+  gridSize: number;
+  tiles: Tile[];
+};
+
+const Grid2: React.FC<Props> = ({ gridSize, tiles }) => {
+  const gridStyle: CSSProperties = {
     display: "grid",
     gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
     gridTemplateRows: `repeat(${gridSize}, 1fr)`,
@@ -15,12 +22,12 @@ const Grid2 = ({ gridSize, tiles }) => {
 
   return (
     <div id="game-board" style={gridStyle}>
-      {tiles.map((tile, index) => (
+      {tiles.map((tile, i) => (
         <div
-          key={index}
+          key={i}
           style={{
             position: "absolute",
-            top: `${tile.y * 20 + 2}vmin`,  // Adjust positioning as needed
+            top: `${tile.y * 20 + 2}vmin`,
             left: `${tile.x * 20 + 2}vmin`,
             backgroundColor: tile.value === 2 ? "#f5f5f5" : "#ffcc00",
             fontSize: "2vmin",

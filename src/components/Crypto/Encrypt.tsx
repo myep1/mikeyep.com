@@ -1,21 +1,32 @@
+// Encrypt.tsx
 import { useState, useRef } from "react";
-import SecretKey from "./SecretKey";
+import SecretKey, { SecretKeyHandle } from "./SecretKey";
+import type { KeyInfo } from './SecretKey'; // note `type`
 
-function Encrypt() {
-  const secretKeyRef = useRef();
-  const [plaintext, setPlaintext] = useState("");
-  const [ciphertext, setCiphertext] = useState("");
-  const [mode, setMode] = useState("text");
-  const [file, setFile] = useState(null);
+type Mode = "text" | "file";
 
-  const enc = new TextEncoder();
-  const toBase64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const enc = new TextEncoder();
 
-  const formatCiphertext = (salt, iv, ct) =>
-    `@aes256gcm$pbkdf2$100000$${toBase64(salt)}$${toBase64(iv)}$${toBase64(ct)}`;
+function toBase64(buf: ArrayBuffer | Uint8Array): string {
+  const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+
+function formatCiphertext(salt: Uint8Array, iv: Uint8Array, ct: ArrayBuffer): string {
+  return `@aes256gcm$pbkdf2$100000$${toBase64(salt)}$${toBase64(iv)}$${toBase64(ct)}`;
+}
+
+export default function Encrypt() {
+  const secretKeyRef = useRef<SecretKeyHandle | null>(null);
+  const [plaintext, setPlaintext] = useState<string>("");
+  const [ciphertext, setCiphertext] = useState<string>("");
+  const [mode, setMode] = useState<Mode>("text");
+  const [file, setFile] = useState<File | null>(null);
 
   const encryptText = async () => {
-    const keyInfo = await secretKeyRef.current?.getKey();
+    const keyInfo: KeyInfo | null | undefined = secretKeyRef.current?.getKey();
     if (!keyInfo) return;
     const { key, salt, iv } = keyInfo;
     const ptBytes = enc.encode(plaintext);
@@ -24,12 +35,13 @@ function Encrypt() {
   };
 
   const encryptFile = async () => {
-    const keyInfo = await secretKeyRef.current?.getKey();
+    const keyInfo: KeyInfo | null | undefined = secretKeyRef.current?.getKey();
     if (!file || !keyInfo) return;
     const { key, salt, iv } = keyInfo;
     const arrayBuffer = await file.arrayBuffer();
     const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, arrayBuffer);
 
+    // concatenate salt || iv || ciphertext for binary output
     const s = new Uint8Array(salt);
     const v = new Uint8Array(iv);
     const c = new Uint8Array(ct);
@@ -59,7 +71,8 @@ function Encrypt() {
             value="text"
             checked={mode === "text"}
             onChange={() => setMode("text")}
-          /> Text
+          />{" "}
+          Text
         </label>
         <label style={{ marginLeft: "1rem" }}>
           <input
@@ -67,7 +80,8 @@ function Encrypt() {
             value="file"
             checked={mode === "file"}
             onChange={() => setMode("file")}
-          /> File
+          />{" "}
+          File
         </label>
       </div>
 
@@ -81,7 +95,9 @@ function Encrypt() {
             rows={4}
             style={{ width: "100%" }}
           />
-          <button onClick={encryptText} style={{ marginTop: "0.5rem" }}>Encrypt</button>
+          <button onClick={encryptText} style={{ marginTop: "0.5rem" }}>
+            Encrypt
+          </button>
           <textarea
             value={ciphertext}
             readOnly
@@ -96,7 +112,7 @@ function Encrypt() {
         <>
           <input
             type="file"
-            onChange={(e) => setFile(e.target.files[0])}
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             style={{ marginTop: "0.5rem" }}
           />
           <button
@@ -111,5 +127,3 @@ function Encrypt() {
     </div>
   );
 }
-
-export default Encrypt;

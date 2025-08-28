@@ -3,7 +3,7 @@ import '../dashboard/Dashboard.css';
 import Weather from '../weather/Weather';
 import Crypto from '../Crypto/Crypto';
 
-function Dashboard() {
+function Dashboard(): JSX.Element {
   return (
     <div className="dashboard-container">      
       <nav>

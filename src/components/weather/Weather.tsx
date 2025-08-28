@@ -1,9 +1,16 @@
+// Weather.tsx
 import { useEffect, useState } from 'react';
 import '../weather/Weather.css';
 
+interface WeatherResponse {
+  current_weather: {
+    temperature: number;
+  };
+}
+
 function Weather() {
-  const [temp, setTemp] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [temp, setTemp] = useState<number | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     async function fetchWeather() {
@@ -11,8 +18,7 @@ function Weather() {
         const res = await fetch(
           'https://api.open-meteo.com/v1/forecast?latitude=41.88&longitude=-87.63&current_weather=true&temperature_unit=fahrenheit'
         );
-        //console.dir(res);
-        const data = await res.json();
+        const data: WeatherResponse = await res.json();
         setTemp(data.current_weather.temperature);
       } catch (e) {
         console.error('Weather fetch failed', e);
