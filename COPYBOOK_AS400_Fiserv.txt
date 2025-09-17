@@ -1,0 +1,70 @@
+      * ============================================================
+      *  COPYBOOK:   AS400 Fiserv Status Test.WIP
+      *  AUTHOR:     Mike Yep
+      *  DATE:       2025-09-17
+      *  PURPOSE:    Defines Header, Detail, and Footer record layouts
+      *              for fixed-length 1000-byte records used in Fiserv
+      *              data ingestion (AS400 → Databricks).
+      * ============================================================
+
+       01  HEADER-RECORD.
+           05  HEADER-LABEL          PIC X(9).      *> Literal "HEADERPSCU"
+           05  FILLER                PIC X(29).     *> Spaces
+           05  FILE-DATE             PIC 9(8).      *> YYYYMMDD
+           05  FILLER                PIC X(2).      *> Spaces
+           05  FILE-TIME             PIC 9(6).      *> HHMMSS
+           05  FILLER                PIC X(45).     *> Spaces
+           05  FILLER                PIC X(900).    *> Null padding
+
+       01  DETAIL-RECORD.
+           05  ACCOUNT-NUMBER            PIC X(30).
+           05  PI-ID                     PIC X(30).
+           05  CLIENT-ID                 PIC 9(5).
+           05  PROC-SYSTEM               PIC 9(5).
+           05  PRIN                      PIC 9(5).
+           05  AGENT-NUMBER              PIC X(5).
+           05  CARDHOLDER-NAME           PIC X(30).
+           05  ADDRESS-LINE-1            PIC X(40).
+           05  ADDRESS-LINE-2            PIC X(40).
+           05  CITY                      PIC X(25).
+           05  STATE                     PIC X(3).
+           05  ZIP                       PIC X(11).
+           05  FACILITY                  PIC X(10).
+           05  LONG-TAP-NUM              PIC X(7).
+           05  PARENT-LIC                PIC 9(11).
+           05  ORIGINAL-LOT-NUM          PIC X(20).
+           05  CURRENT-LOT-NUM           PIC X(20).
+           05  DUW-NUM                   PIC 9(11).
+           05  SEARCH-CODE               PIC 9(7).
+           05  TRANSACTION-TYPE          PIC X(2).
+           05  INPUT-DATE                PIC 9(9).
+           05  DUE-DATE                  PIC 9(9).
+           05  CARD-STATUS               PIC X(10).
+           05  PRODUCTION-OPERATION      PIC X(10).
+           05  HOLD-TYPE                 PIC X(15).
+           05  MULTILINE-HOLD-REPORT     PIC X(15).
+           05  MULTI-HOLD-FLAG           PIC X(1).
+           05  HOLD-CODE-1               PIC X(4).
+           05  HOLD-CODE-DESC-1          PIC X(30).
+           05  HOLD-CODE-2               PIC X(4).
+           05  HOLD-CODE-DESC-2          PIC X(30).
+           05  HOLD-CODE-3               PIC X(4).
+           05  HOLD-CODE-DESC-3          PIC X(30).
+           05  HOLD-DATE                 PIC 9(9).
+           05  DAYS-ON-HOLD              PIC 9(9).
+           05  MATERIAL-ITEM-NUM         PIC X(20).
+           05  MATERIAL-DESC             PIC X(30).
+           05  LAST-PROCESSED-DATE       PIC 9(9).
+           05  SHIP-DATE                 PIC 9(8).
+           05  SHIP-METHOD               PIC X(10).
+           05  TRACKING-NUMBER           PIC X(20).
+           05  FILLER                    PIC X(297). *> Padding to reach 1000
+
+       01  FOOTER-RECORD.
+           05  FOOTER-LABEL          PIC X(7).      *> Literal "TRAILER"
+           05  RECORD-COUNT-1        PIC 9(9).      *> First count
+           05  RECORD-COUNT-2        PIC 9(9).      *> Second count
+           05  RECORD-COUNT-3        PIC 9(9).      *> Third count
+           05  FILLER                PIC X(66).     *> Spaces
+           05  FILLER                PIC X(900).    *> Null padding
+
