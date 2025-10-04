@@ -1,22 +1,18 @@
-// OperationButton.tsx
-import { ACTIONS } from "./Calculator";
+import { ACTIONS, type Action } from "./Calculator"
+
+type Operation = "+" | "-" | "*" | "÷"
 
 type OperationButtonProps = {
-  dispatch: React.Dispatch<{ type: string; payload?: any }>;
-  operation: string;
-};
+  operation: Operation
+  dispatch: React.Dispatch<Action>
+}
 
-export default function OperationButton({
-  dispatch,
-  operation,
-}: OperationButtonProps) {
+export default function OperationButton({ operation, dispatch }: OperationButtonProps) {
   return (
     <button
-      onClick={() =>
-        dispatch({ type: ACTIONS.CHOOSE_OPERATION, payload: { operation } })
-      }
+      onClick={() => dispatch({ type: ACTIONS.CHOOSE_OPERATION, payload: { operation } })}
     >
       {operation}
     </button>
-  );
+  )
 }

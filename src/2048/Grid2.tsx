@@ -4,9 +4,10 @@ import { CSSProperties } from "react";
 export type Tile = { x: number; y: number; value: number };
 
 type Props = {
-  gridSize: number;
-  tiles: Tile[];
-};
+  gridSize: number
+  tiles: Tile[]
+  children?: React.ReactNode
+}
 
 const Grid2: React.FC<Props> = ({ gridSize, tiles }) => {
   const gridStyle: CSSProperties = {

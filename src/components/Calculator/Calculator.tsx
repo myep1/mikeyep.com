@@ -1,8 +1,8 @@
 // src/components/Calculator/Calculator.tsx
-import { useReducer } from "react";
-import "./Calculator.css";
-import DigitButton from "./DigitButton";
-import OperationButton from "./OperationButton";
+import { useReducer } from "react"
+import "./Calculator.css"
+import DigitButton from "./DigitButton"
+import OperationButton from "./OperationButton"
 
 export const ACTIONS = {
   ADD_DIGIT: "add-digit",
@@ -10,30 +10,32 @@ export const ACTIONS = {
   CLEAR: "clear",
   DELETE_DIGIT: "delete-digit",
   EVALUATE: "evaluate",
-} as const;
+} as const
 
-type Operation = "+" | "-" | "*" | "÷";
+export type Action =
+  | { type: typeof ACTIONS.ADD_DIGIT; payload: { digit: string } }
+  | { type: typeof ACTIONS.CHOOSE_OPERATION; payload: { operation: Operation } }
+  | { type: typeof ACTIONS.CLEAR }
+  | { type: typeof ACTIONS.DELETE_DIGIT }
+  | { type: typeof ACTIONS.EVALUATE }
+
+
+type Operation = "+" | "-" | "*" | "÷"
 
 type State = {
-  currentOperand: string | null;
-  previousOperand: string | null;
-  operation: Operation | null;
-  overwrite: boolean;
-};
-
-type AddDigit = { type: typeof ACTIONS.ADD_DIGIT; payload: { digit: string } };
-type ChooseOp = { type: typeof ACTIONS.CHOOSE_OPERATION; payload: { operation: Operation } };
-type Clear = { type: typeof ACTIONS.CLEAR };
-type DeleteDigit = { type: typeof ACTIONS.DELETE_DIGIT };
-type Evaluate = { type: typeof ACTIONS.EVALUATE };
-type Action = AddDigit | ChooseOp | Clear | DeleteDigit | Evaluate;
+  currentOperand: string | null
+  previousOperand: string | null
+  operation: Operation | null
+  overwrite: boolean
+}
 
 const initialState: State = {
   currentOperand: null,
   previousOperand: null,
   operation: null,
   overwrite: false,
-};
+}
+
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -93,6 +95,7 @@ function evaluate({ currentOperand, previousOperand, operation }: State): string
 
 export default function Calculator() {
   const [{ currentOperand, previousOperand, operation }, dispatch] = useReducer(reducer, initialState);
+  console.log("render calc", currentOperand, previousOperand, operation)
   return (
     <div className="calculator-grid">
       <div className="output">

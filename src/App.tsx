@@ -5,7 +5,7 @@ import Game from './2048/Game';
 import HackerTyper from './components/HackerTyper/HackerTyper';
 import Dashboard from './components/dashboard/Dashboard';
 
-function App(): JSX.Element {
+function App() {
   const deployTimestamp = import.meta.env.VITE_DEPLOY_TIMESTAMP as string | undefined;
   const deployType = import.meta.env.VITE_DEPLOY_TYPE as string | undefined;
   const renderHackerTyper = import.meta.env.VITE_HACKER_TYPER as string | undefined; // "true"/"false"
@@ -35,7 +35,7 @@ function App(): JSX.Element {
               </>
             }
           />
-          <Route path="/2048" element={<Game />} />
+          <Route path="/2048" element={<Game />} />          
           <Route path="/dashboard/*" element={<Dashboard />} />
         </Routes>
       </div>

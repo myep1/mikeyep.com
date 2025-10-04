@@ -1,10 +1,11 @@
 // DigitButton.tsx
-import { ACTIONS } from "./Calculator";
+
+import { ACTIONS, type Action } from "./Calculator"
 
 type DigitButtonProps = {
-  dispatch: React.Dispatch<{ type: string; payload?: any }>;
-  digit: string;
-};
+  digit: string
+  dispatch: React.Dispatch<Action>
+}
 
 export default function DigitButton({ dispatch, digit }: DigitButtonProps) {
   return (
