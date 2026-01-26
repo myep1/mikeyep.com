@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+"""
+Usage:
+  python redact.py <config.txt> <datafile>
+
+Config example:
+
+# fiserv_emboss_request
+type=FIXED
+encoding=ASCII
+reclen=3101        # includes EOL
+eol=0a             # '', 0d, 0a, or 0d0a
+header=0           # records to skip at start
+trailer=0          # records to skip at end
+
+# label,offset,replacement
+pin_offs_1,602,000
+cvv_1,606,000
+pin_cvv2_cd,609,000
+icvv,769,000
+pchp_encr_pin_blck_cd,714,0000000000000000
+"""
+
+import sys
+
+def parse_eol(hexstr):
+    hexstr = hexstr.strip().lower()
+    if not hexstr:
+        return b""
+    return bytes.fromhex(hexstr)
+
+def parse_config(path):
+    cfg = {}
+    rules = []
+
+    with open(path, "r") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+
+            if "=" in line:
+                k, v = line.split("=", 1)
+                cfg[k.strip().lower()] = v.strip()
+            else:
+                label, offs, repl = line.split(",", 2)
+                rules.append((label, int(offs), repl))
+
+    return cfg, rules
+
+def main():
+    if len(sys.argv) != 3:
+        print("Usage: python redact.py <config> <datafile>")
+        sys.exit(1)
+
+    cfg, rules = parse_config(sys.argv[1])
+
+    reclen   = int(cfg["reclen"])
+    encoding = cfg["encoding"].upper()
+    eol      = parse_eol(cfg.get("eol", ""))
+    header   = int(cfg.get("header", 0))
+    trailer  = int(cfg.get("trailer", 0))
+
+    charset = "ascii" if encoding == "ASCII" else "cp037"
+
+    with open(sys.argv[2], "r+b") as f:
+        f.seek(0, 2)
+        filesize = f.tell()
+        total_records = filesize // reclen
+
+        start_rec = header
+        end_rec = total_records - trailer
+
+        print(f"Records: {total_records}, processing {start_rec}..{end_rec-1}")
+
+        for recnum in range(start_rec, end_rec):
+            pos = recnum * reclen
+            f.seek(pos)
+            record = bytearray(f.read(reclen))
+
+            for label, offs, repl in rules:
+                b = repl.encode(charset)
+                record[offs:offs+len(b)] = b
+
+            f.seek(pos)
+            f.write(record)
+
+    print("Redaction complete.")
+
+if __name__ == "__main__":
+    main()
