@@ -25,8 +25,7 @@ function App() {
                 <div className="footer-block">
                   <div className="footer-links">
                     <a href="#/2048">2048</a>
-                    <a href="#/dashboard">Dashboard</a>
-                    <a href="/gpg.txt" target="_blank" rel="noreferrer">GPG Key</a>
+                    <a href="#/dashboard">Dashboard</a>                  
                     <a href="https://www.linkedin.com/in/mike-yep" target="_blank" rel="noreferrer">Linkedin Profile</a>
                   </div>
                   <span>© {year} Mike Yep. All Rights Reserved.</span>
